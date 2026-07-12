@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Upstreet To-Do</title>
+<style>
+  :root { --bg:#0b0b0f; --card:#15151d; --line:#262633; --fg:#e8e8ef; --mut:#8b8b9b; --accent:#6d5efc; }
+  * { box-sizing:border-box; } body { margin:0; font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--fg); }
+  .wrap { max-width:520px; margin:8vh auto; padding:0 20px; }
+  h1 { font-size:26px; letter-spacing:-.02em; margin:0 0 4px; } .sub { color:var(--mut); margin:0 0 24px; font-size:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; }
+  form { display:flex; gap:8px; margin-bottom:14px; }
+  input[type=text] { flex:1; background:#0f0f16; border:1px solid var(--line); color:var(--fg); padding:11px 13px; border-radius:10px; outline:none; }
+  input[type=text]:focus { border-color:var(--accent); }
+  button { background:var(--accent); color:#fff; border:0; padding:0 16px; border-radius:10px; font-weight:600; cursor:pointer; }
+  ul { list-style:none; margin:0; padding:0; } li { display:flex; align-items:center; gap:10px; padding:10px 4px; border-top:1px solid var(--line); }
+  li:first-child { border-top:0; } li.done label { color:var(--mut); text-decoration:line-through; }
+  label { flex:1; cursor:pointer; } .del { background:none; color:var(--mut); padding:4px 8px; font-size:18px; }
+  .empty { color:var(--mut); text-align:center; padding:18px 0; font-size:14px; }
+  footer { color:var(--mut); font-size:12px; text-align:center; margin-top:18px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>To-Do</h1>
+    <p class="sub">Deployed to a live playground via the Upstreet MCP.</p>
+    <div class="card">
+      <form id="f"><input id="t" type="text" placeholder="Add a task…" autocomplete="off" /><button>Add</button></form>
+      <ul id="list"></ul>
+      <div class="empty" id="empty">Nothing yet — add your first task.</div>
+    </div>
+    <footer>upstreet-todo-demo · served by nginx on a playground</footer>
+  </div>
+<script>
+  const KEY="upstreet-todo"; const list=document.getElementById("list"), empty=document.getElementById("empty"), t=document.getElementById("t");
+  let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+  const save=()=>localStorage.setItem(KEY,JSON.stringify(items));
+  function render(){ list.innerHTML=""; empty.style.display=items.length?"none":"block";
+    items.forEach((it,i)=>{ const li=document.createElement("li"); if(it.done)li.className="done";
+      const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=it.done; cb.onchange=()=>{items[i].done=cb.checked;save();render();};
+      const lab=document.createElement("label"); lab.textContent=it.text;
+      const del=document.createElement("button"); del.className="del"; del.textContent="×"; del.title="delete"; del.onclick=()=>{items.splice(i,1);save();render();};
+      li.append(cb,lab,del); list.append(li); }); }
+  document.getElementById("f").onsubmit=e=>{ e.preventDefault(); const v=t.value.trim(); if(!v)return; items.push({text:v,done:false}); t.value=""; save(); render(); };
+  render();
+</script>
+</body>
+</html>
